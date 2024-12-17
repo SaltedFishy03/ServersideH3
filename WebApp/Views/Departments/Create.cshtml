@@ -1,0 +1,125 @@
+@model WebApp.Models.Student
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create Student</h1>
+
+<h4>Student</h4>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <!-- Student Details -->
+            <div class="form-group">
+                <label asp-for="LastName" class="control-label"></label>
+                <input asp-for="LastName" class="form-control" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FirstMidName" class="control-label"></label>
+                <input asp-for="FirstMidName" class="form-control" />
+                <span asp-validation-for="FirstMidName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="EnrollmentDate" class="control-label"></label>
+                <input asp-for="EnrollmentDate" class="form-control" />
+                <span asp-validation-for="EnrollmentDate" class="text-danger"></span>
+            </div>
+
+            <!-- Courses Selection -->
+            <div class="form-group">
+                <label for="Courses">Courses</label>
+                <select id="Courses" name="selectedCourses" class="form-control" multiple="multiple">
+                    @if (ViewData["CourseList"] != null)
+                    {
+                        var courseList = ViewData["CourseList"] as SelectList;
+                        foreach (var course in courseList)
+                        {
+                            <option value="@course.Value">@course.Text</option>
+                        }
+                    }
+                    else
+                    {
+                        <option>No courses available.</option>
+                    }
+                </select>
+                <span class="text-danger" id="CoursesError"></span>
+            </div>
+
+            <!-- Dynamic Grade Dropdown for Each Selected Course -->
+            <div id="GradesSection" class="form-group">
+                <label for="Grades">Grades</label>
+                <div id="grades">
+                    <!-- This section will be dynamically filled with grade dropdowns for selected courses -->
+                </div>
+            </div>
+            <div class="form-group">
+                <button type="button" id="add-course-btn" class="btn btn-success">Add Course</button>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+            var coursesSelect = document.getElementById("Courses");
+            var gradesDiv = document.getElementById("grades");
+
+            // Define the grades list as a static array
+            var gradesList = [
+                { Value: 'A', Text: 'A' },
+                { Value: 'B', Text: 'B' },
+                { Value: 'C', Text: 'C' },
+                { Value: 'D', Text: 'D' },
+                { Value: 'F', Text: 'F' }
+            ];
+
+            // Add a new course and grade to the form
+            document.getElementById("add-course-btn").addEventListener("click", function () {
+                var selectedCourses = Array.from(coursesSelect.selectedOptions).map(option => option.value);
+
+                // For each selected course, create a corresponding dropdown for the grade
+                selectedCourses.forEach(function (courseId) {
+                    var div = document.createElement("div");
+                    div.className = "form-group";
+
+                    // Label for the grade dropdown
+                    var label = document.createElement("label");
+                    label.innerText = "Grade for Course " + courseId; // You can enhance this by getting the course name dynamically
+                    div.appendChild(label);
+
+                    // Create the dropdown for grades
+                    var select = document.createElement("select");
+                    select.name = "grades"; // Use the same name for the grades array
+                    select.className = "form-control";
+
+                    // Populate the grade options with the hardcoded list
+                    gradesList.forEach(function (grade) {
+                        var option = document.createElement("option");
+                        option.value = grade.Value;
+                        option.innerText = grade.Text;
+                        select.appendChild(option);
+                    });
+
+                    div.appendChild(select);
+                    gradesDiv.appendChild(div);
+                });
+            });
+        });
+    </script>
+}
